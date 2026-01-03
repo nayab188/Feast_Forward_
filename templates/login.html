@@ -1,0 +1,46 @@
+<link rel="stylesheet" href="../static/css/style.css">
+
+<div class="food-bg">
+  <span>🍕</span>
+  <span>🍔</span>
+  <span>🍩</span>
+  <span>🍜</span>
+  <span>🥗</span>
+</div>
+
+<div class="welcome-card" id="welcomeCard">
+  <h1>Feast Forward🍕</h1>
+  <p>Manage your restaurant<br>smartly & effortlessly</p>
+</div>
+
+
+<form method="post" class="card">
+
+  <div class="input-group">
+    <input name="username" placeholder="Username" required>
+  </div>
+
+  <div class="input-group">
+    <input type="password" name="password" placeholder="Password" required>
+  </div>
+  {% if error %}
+  <div class="error-msg">
+    {{ error }}
+  </div>
+  {% endif %}
+  
+  <button type="submit">Login</button>
+
+  <a href="/signup">Create Account</a>
+</form>
+
+<script>
+  const welcome = document.getElementById("welcomeCard");
+  const inputs = document.querySelectorAll("input");
+
+  inputs.forEach(input => {
+    input.addEventListener("input", () => {
+      welcome.classList.add("fade");
+    });
+  });
+</script>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Feast Forward</title>
+  <link rel="stylesheet" href="../static/css/dashboard.css">
+</head>
+
+<body>
+
+  <div class="dashboard">
+
+    <!-- Left side feature vocche panel -->
+    <aside class="sidebar">
+      <h2>{{ user.restaurant_name }}</h2>
+
+      <nav>
+        {% if services.grocery %}
+        <a href="/grocery">🥦 Grocery Management</a>
+        {% endif %}
+        {% if services.staff %}
+        <a href="/staff">👨‍🍳 Staff Management</a>
+        {% endif %}
+        {% if services.combo %}
+        <a href="/combo">🍱 Combo Creation</a>
+        {% endif %}
+      </nav>
+      <div class="sidebar-bottom">
+        <a href="/logout" class="logout-btn">🚪 Logout</a>
+      </div>
+    </aside>
+
+    <!-- Right side vunde Prediction page -->
+    <main class="content">
+      {% if error %}
+      <div style="color:red; margin-bottom:15px;">
+        {{ error }}
+      </div>
+      {% endif %}
+
+      <header>
+        <h1>📈 Meal Demand Prediction</h1>
+        <p>Smarter predictions with better data</p>
+      </header>
+
+
+      <!-- sales data upload cheyadaniki -->
+      <section class="card upload-card">
+
+        <div class="upload-header">
+          <h3>📤 Upload Menu Sales Data</h3>
+          <p>Add all menu items first, then process together</p>
+        </div>
+
+        <form method="POST" action="/process-all-sales" enctype="multipart/form-data">
+
+          <div id="menuUploadContainer">
+            <div class="csv-hint">
+              <strong>Choose a CSV file to upload! 📂</strong>
+            </div>
+            <div class="menu-row">
+              <input type="text" name="menu_items[]" placeholder="Menu Item Name" required>
+              <input type="file" name="sales_csvs[]" accept=".csv" required>
+
+            </div>
+
+
+          </div>
+
+          <div class="actions">
+            <button type="button" class="add-btn" onclick="addRow()">
+              ➕ Add Menu Item
+            </button>
+
+            <button type="submit" class="process-btn">
+              ⚙️ Process All Data
+            </button>
+          </div>
+
+
+
+        </form>
+
+      </section>
+
+      <!-- predictions vocche table -->
+      <section class="card slide-up">
+        <h3>Prediction Results</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Menu Item</th>
+              <th>Prediction Date & Time</th>
+              <th>Predicted Servings</th>
+            </tr>
+          </thead>
+
+          
+          <tbody>
+            {% if predictions %}
+            {% for p in predictions %}
+            <tr>
+              <td>{{ p[0] }}</td>
+              <td>{{ p[1] }}</td>
+              <td>{{ p[2] }}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+              <td colspan="3" style="text-align:center; opacity:0.6;">
+                No predictions yet
+              </td>
+            </tr>
+            {% endif %}
+          </tbody>
+
+        </table>
+
+        <button class="predict-btn" onclick="openPredict()">
+          Predict Demand
+        </button>
+      </section>
+
+
+    </main>
+  </div>
+
+  <!-- pop up lo vocche display -->
+  <div class="modal" id="predictModal">
+    <div class="modal-card">
+
+      <h2>🔮 Meal Demand Prediction</h2>
+
+      <form method="POST" action="/predict" id="predictForm">
+
+
+        <select name="menu_item" required>
+          <option value="" disabled selected>Select Menu Item</option>
+          {% for item in menu_items %}
+          <option value="{{ item }}">{{ item }}</option>
+          {% endfor %}
+        </select>
+
+        <input type="date" name="date" required>
+
+        <input type="number" name="temperature" placeholder="Temperature (°C)">
+
+        <input name="event" placeholder="Local Event (optional)">
+
+        <select name="holiday">
+          <option value="0">No Holiday</option>
+          <option value="1">Holiday</option>
+        </select>
+
+        <button type="submit">Predict</button>
+      </form>
+
+      <!-- Result -->
+      {% if prediction %}
+      <div class="prediction-result">
+        <h3> Prediction Result </h3>
+
+        <p>
+          Estimated Servings:
+          <strong>{{ prediction.demand }}</strong>
+        </p>
+
+        <p>
+          Demand ID:
+          <strong>{{ prediction.id }}</strong>
+        </p>
+
+        <form method="POST" action="/save-prediction">
+          <input type="hidden" name="prediction_uid" value="{{ prediction.id }}">
+          <input type="hidden" name="menu_item" value="{{ prediction.menu_item }}">
+          <input type="hidden" name="servings" value="{{ prediction.demand }}">
+          <button class="save-btn">Save to Dashboard</button>
+        </form>
+
+      </div>
+      {% endif %}
+
+      <span class="close" onclick="closePredict()">✖</span>
+
+    </div>
+  </div>
+
+
+</body>
+
+<script>
+  function openPredict() {
+    document.getElementById("predictModal").style.display = "flex";
+  }
+
+  function closePredict() {
+    document.getElementById("predictModal").style.display = "none";
+  }
+
+  function addRow() {
+    const container = document.getElementById("menuUploadContainer");
+
+    const row = document.createElement("div");
+    row.className = "menu-row";
+
+    row.innerHTML = `
+        <input
+          type="text"
+          name="menu_items[]"
+          placeholder="Menu Item Name"
+          required
+        >
+        <input
+          type="file"
+          name="sales_csvs[]"
+          accept=".csv"
+          required
+        >
+      `;
+
+    container.appendChild(row);
+  }
+
+
+</script>
+
+</html>
