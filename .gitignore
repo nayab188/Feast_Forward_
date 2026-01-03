@@ -41,3 +41,8 @@ static/images/*
 Thumbs.db
 .vscode/
 .idea/
+
+
+database.db-journal
+database.db-wal
+database.db-shm
